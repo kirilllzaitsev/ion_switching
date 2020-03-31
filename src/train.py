@@ -19,7 +19,7 @@ FOLD_MAPPING = {
 
 
 if __name__ == "__main__":
-    print(MODEL)
+    
     threshold = 1
     df = pd.read_csv(TRAIN_DATA)
     train_df = df[df.kfold.isin(FOLD_MAPPING.get(str(FOLD)))].iloc[:int(len(df)*threshold)]
@@ -28,18 +28,20 @@ if __name__ == "__main__":
     y_train = train_df.open_channels.values
     y_test = val_df.open_channels.values
 
-    train_df = train_df.drop(["open_channels"], axis=1)
-    val_df = val_df.drop(["open_channels"], axis=1)
+    train_df = train_df.drop("open_channels", axis=1)
+    val_df = val_df.drop("open_channels", axis=1)
+    train_df = train_df.drop("kfold", axis=1)
+    val_df = val_df.drop("kfold", axis=1)
 
-    val_df = val_df[train_df.columns]
+    # val_df = val_df[train_df.columns]
 
     #n_jobs = -1 may lead to errors!
-    model = dispatcher.MODELS.get(MODEL)
-    clf = ensemble.RandomForestClassifier(n_estimators=32, n_jobs=4,
-	criterion='gini',verbose=2)
+    clf = dispatcher.MODELS.get(MODEL)
+    # clf = ensemble.RandomForestClassifier(n_estimators=32, n_jobs=4,
+	# criterion='gini',verbose=2)
     clf.fit(train_df, y_train)
 
     preds = clf.predict(val_df)
 
     print(metrics.f1_score(y_test, preds, average=None))
-    joblib.dump(clf, f"models/{MODEL}.pkl")
+    joblib.dump(clf, f"models/{MODEL}_{str(FOLD)}.pkl")
