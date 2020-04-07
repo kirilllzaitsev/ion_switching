@@ -1,4 +1,6 @@
 from sklearn import metrics, preprocessing, ensemble
+from sklearn.model_selection import learning_curve
+from sklearn.metrics import f1_score, make_scorer
 import pandas as pd
 import os 
 import joblib
@@ -42,6 +44,7 @@ if __name__ == "__main__":
     clf.fit(train_df, y_train)
 
     preds = clf.predict(val_df)
+    # f1_scorer = make_scorer(f1_score, average='macro')
 
-    print(metrics.f1_score(y_test, preds, average=None))
+    print(metrics.f1_score(y_test, preds, average='macro'))
     joblib.dump(clf, f"models/{MODEL}_{str(FOLD)}.pkl")

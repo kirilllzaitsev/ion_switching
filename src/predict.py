@@ -8,27 +8,30 @@ from tqdm import tqdm
 import gc
 
 TEST_DATA = os.environ.get("TEST_DATA")
-# FOLD = int(os.environ.get("FOLD"))
-# TEST_DATA = "input/test.csv"
-# TRAIN_DATA = "input/train_folds.csv"
-# FOLD = 0
 MODEL = os.environ.get("MODEL")
 
 
 def predict():
     print(MODEL)
-    df = pd.read_csv(TEST_DATA)
-
+    df = pd.read_csv(TEST_DATA) # len(df) = 2 000 000
+    
+    batches = 10
+    chunk = len(df) // batches
+    preds = []
     for FOLD in tqdm(range(5),total=5):
         model = joblib.load(f"models/{MODEL}_{str(FOLD)}.pkl")
-        
-        if FOLD == 0:
-            preds = model.predict(df)
-            joblib.dump(preds, f"models/predictions_{str(FOLD)}.pkl")
-        else:
-            preds += model.predict(df)
+        preds = np.zeros((batches,chunk))
+        for batch in range(batches):
+            if FOLD == 0:
+                preds[batch] = model.predict(df.iloc[chunk*batch:chunk*batch+chunk])
+            else:
+                preds[batch] += model.predict(df.iloc[chunk*batch:chunk*batch+chunk])
 
-    preds = np.true_divide(preds, 5)
+        joblib.dump(preds, f"models/predictions_{str(FOLD)}.pkl")
+        del preds
+
+    preds = np.column_stack([joblib.load(f'models/predictions_{str(i)}') for i in range(5)])
+    preds = np.true_divide(np.ravel(preds), 5)
     
     preds = pd.DataFrame(np.column_stack((df['time'], preds)), columns=['time', 'open_channels'])
     return preds
