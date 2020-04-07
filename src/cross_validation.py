@@ -73,5 +73,6 @@ if __name__ == "__main__":
     cv = CrossValidation(df, shuffle=True, target_cols=["open_channels"], 
                          problem_type="multiclass_classification")
     df_split = cv.split()
+    df_split.to_csv('input/train_folds.csv',index=False)
     print(df_split.head())
     print(df_split.kfold.value_counts())
