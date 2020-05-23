@@ -3,6 +3,7 @@ from sklearn import model_selection
 import pandas as pd
 
 TRAIN_DATA = 'input/train.csv'
+TEST_DATA = 'input/test.csv'
 
 class CrossValidation:
     def __init__(self, df, target_cols, 
@@ -69,10 +70,18 @@ class CrossValidation:
         return self.df
 
 if __name__ == "__main__":
-    df = pd.read_csv(TRAIN_DATA)
+    # df = pd.read_csv(TRAIN_DATA)
+    # cv = CrossValidation(df, shuffle=True, target_cols=["open_channels"], 
+    #                      problem_type="multiclass_classification")
+    # df_split = cv.split()
+    # df_split.to_csv('input/train_folds.csv',index=False)
+    df = pd.read_csv(TEST_DATA)
+    df['open_channels'] = -1
+    df.loc[:(len(df)//2),'open_channels'] = 0
     cv = CrossValidation(df, shuffle=True, target_cols=["open_channels"], 
                          problem_type="multiclass_classification")
     df_split = cv.split()
-    df_split.to_csv('input/train_folds.csv',index=False)
+    df.drop('open_channels',axis=1,inplace=True)
+    df_split.to_csv('input/test_folds.csv',index=False)
     print(df_split.head())
     print(df_split.kfold.value_counts())

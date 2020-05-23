@@ -4,6 +4,7 @@ from sklearn.metrics import f1_score, make_scorer
 import pandas as pd
 import os 
 import joblib
+import pickle
 from . import dispatcher
 
 TRAIN_DATA = os.environ.get("TRAIN_DATA")
@@ -30,21 +31,23 @@ if __name__ == "__main__":
     y_train = train_df.open_channels.values
     y_test = val_df.open_channels.values
 
-    train_df = train_df.drop("open_channels", axis=1)
-    val_df = val_df.drop("open_channels", axis=1)
-    train_df = train_df.drop("kfold", axis=1)
-    val_df = val_df.drop("kfold", axis=1)
+    train_df = train_df.drop(["open_channels","kfold"], axis=1)
+    val_df = val_df.drop(["open_channels", "kfold"], axis=1)
+    # train_df = train_df.drop("kfold", axis=1)
+    # val_df = val_df.drop("kfold", axis=1)
 
     # val_df = val_df[train_df.columns]
 
     #n_jobs = -1 may lead to errors!
+    print(train_df.columns)
     clf = dispatcher.MODELS.get(MODEL)
     # clf = ensemble.RandomForestClassifier(n_estimators=32, n_jobs=4,
 	# criterion='gini',verbose=2)
     clf.fit(train_df, y_train)
-
+    del train_df, y_train
     preds = clf.predict(val_df)
     # f1_scorer = make_scorer(f1_score, average='macro')
 
     print(metrics.f1_score(y_test, preds, average='macro'))
-    joblib.dump(clf, f"models/{MODEL}_{str(FOLD)}.pkl")
+    with open(f"models/{MODEL}_{str(FOLD)}.pkl", "wb+") as f:
+        pickle.dump(clf, f)
