@@ -1,11 +1,14 @@
 import numpy as np
 import pandas as pd
 import itertools
+import pywt
 
-def main():
+df_train = pd.read_csv("input/train.csv")
+df_test  = pd.read_csv("input/test.csv")
 
-    df_train = pd.read_csv("input/train.csv")
-    df_test  = pd.read_csv("input/test.csv")
+def remove_drift():
+
+
     hist_bins = np.linspace(-4,10,500)
     clean_hist = []
     hist_bins = np.linspace(-4,10,500)
@@ -100,14 +103,37 @@ def main():
         test_signal_shift_clean.append(data_2)
         test_signal_detrend.append(signal + data_2)
 
-    df_train.signal = list(itertools.chain(*train_signal_detrend))
-    df_test.signal = list(itertools.chain(*test_signal_detrend))
+
+    df_train['ndrift_signal'] = list(itertools.chain(*train_signal_detrend))
+    df_test['ndrift_signal'] = list(itertools.chain(*test_signal_detrend))
 
     # df_train.groups = train_segm_signal_groups
     # df_test.groups = test_segm_signal_groups
 
-    df_train.to_csv('input/train.csv',index=False)
-    df_test.to_csv('input/test.csv',index=False)
+
+
+def denoise():
+
+    def maddest(d, axis=None):
+        return np.mean(np.absolute(d - np.mean(d, axis)), axis)
+
+    def denoise_signal(x, wavelet='db4', level=1):
+        coeff = pywt.wavedec(x, wavelet, mode="per")
+        sigma = (1/0.6745) * maddest(coeff[-level])
+
+        uthresh = sigma * np.sqrt(2*np.log(len(x)))
+        coeff[1:] = (pywt.threshold(i, value=uthresh, mode='hard') for i in coeff[1:])
+
+        return pywt.waverec(coeff, wavelet, mode='per')
+
+    df_train['denoised_signal'] = denoise_signal(df_train.signal)
+    df_test['denoised_signal'] = denoise_signal(df_test.signal)
 
 if __name__ == '__main__':
-    main()
+    globals()
+
+    remove_drift()
+    denoise()
+
+    df_train.to_csv('input/train.csv',index=False)
+    df_test.to_csv('input/test.csv',index=False)
