@@ -120,24 +120,22 @@ if __name__ == "__main__":
 
     # plt.figure(figsize = (16,5))
     # single_train_score_lc(clf, train_df, y_train, train_sizes=1, cv=2)
-    # fig, axes = plt.subplots(3, 2, figsize=(10, 15))
 
+	fig, axes = plt.subplots(3, 1, figsize=(10, 15))
+    title = "Learning Curves (RF)"
+    Cross validation with 100 iterations to get smoother mean test and train
+    score curves, each time with 20% data randomly selected as a validation set.
+    cv = ShuffleSplit(n_splits=2, test_size=0.2, random_state=42)
 
+    plot_learning_curve(clf, title, train_df, y_train, axes=axes[:, 0],ylim=(0.7, 1.01),
+                        cv=cv, n_jobs=1)
 
-    # title = "Learning Curves (RF)"
-    # Cross validation with 100 iterations to get smoother mean test and train
-    # score curves, each time with 20% data randomly selected as a validation set.
-    # cv = ShuffleSplit(n_splits=2, test_size=0.2, random_state=42)
-    #
-    # plot_learning_curve(clf, title, train_df, y_train, axes=axes[:, 0],
-    #                     cv=cv, n_jobs=1)
-
-    # plot_learning_curve(clf, title, X, y, axes=axes[:, 1], ylim=(0.7, 1.01),
-    #                     cv=cv, n_jobs=4)
-    # plt.show()
+    plt.show()
 
     clf.fit(train_df, y_train)
+	
     del train_df, y_train
+
     preds = clf.predict(val_df)
 
 
