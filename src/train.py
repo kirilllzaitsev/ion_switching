@@ -44,7 +44,7 @@ def single_train_score_lc(estimator, train_df, target, train_sizes, cv):
 
 
 def plot_learning_curve(estimator, title, X, y, axes=None, ylim=None, cv=None,
-                        n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5)):
+                        n_jobs=None, train_sizes=np.linspace(.5, 1.0, 5)):
 
     f1_scorer = make_scorer(f1_score, average='macro')
     if axes is None:
@@ -112,8 +112,8 @@ if __name__ == "__main__":
     y_train = train_df.open_channels.values
     y_test = val_df.open_channels.values
 
-    train_df = train_df.drop(["open_channels","kfold"], axis=1)
-    val_df = val_df.drop(["open_channels", "kfold"], axis=1)
+    train_df = train_df.drop(["open_channels","kfold","time"], axis=1)
+    val_df = val_df.drop(["open_channels", "kfold","time"], axis=1)
 
     print(train_df.columns)
     clf = dispatcher.MODELS.get(MODEL)
@@ -121,19 +121,19 @@ if __name__ == "__main__":
     # plt.figure(figsize = (16,5))
     # single_train_score_lc(clf, train_df, y_train, train_sizes=1, cv=2)
 
-	fig, axes = plt.subplots(3, 1, figsize=(10, 15))
-    title = "Learning Curves (RF)"
-    Cross validation with 100 iterations to get smoother mean test and train
-    score curves, each time with 20% data randomly selected as a validation set.
-    cv = ShuffleSplit(n_splits=2, test_size=0.2, random_state=42)
-
-    plot_learning_curve(clf, title, train_df, y_train, axes=axes[:, 0],ylim=(0.7, 1.01),
-                        cv=cv, n_jobs=1)
-
-    plt.show()
+    # fig, axes = plt.subplots(3, 1, figsize=(10, 15))
+    # title = "Learning Curves (RF)"
+    # # Cross validation with 100 iterations to get smoother mean test and train
+    # # score curves, each time with 20% data randomly selected as a validation set.
+    # cv = ShuffleSplit(n_splits=2, test_size=0.2, random_state=42)
+    #
+    # plot_learning_curve(clf, title, train_df, y_train, axes=axes,ylim=(0.7, 1.01),
+    #                     cv=cv, n_jobs=1)
+    #
+    # plt.show()
 
     clf.fit(train_df, y_train)
-	
+
     del train_df, y_train
 
     preds = clf.predict(val_df)

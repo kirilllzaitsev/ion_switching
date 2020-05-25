@@ -2,8 +2,12 @@ from sklearn import ensemble
 from xgboost import XGBClassifier
 
 MODELS = {
-    "rF": ensemble.RandomForestClassifier(n_estimators=40,max_depth=7,n_jobs=8,
+    "rFOCslow": ensemble.RandomForestClassifier(n_estimators=80,max_depth=2,n_jobs=8,
                                                               class_weight='balanced',verbose=2),
-    "extraT": ensemble.ExtraTreesClassifier(n_estimators=40,n_jobs=8,
-                                                            class_weight='balanced_subsample',verbose=2)
+    "rFoth": ensemble.RandomForestClassifier(n_estimators=40,max_leaf_nodes=6,n_jobs=8,
+                                                              class_weight='balanced',verbose=2),
+    # "rF2": ensemble.RandomForestClassifier(n_estimators=40,max_depth=7,n_jobs=8,
+    #                                                               class_weight='balanced',verbose=2),
+    # "rF34": ensemble.RandomForestClassifier(n_estimators=40,max_depth=2,n_jobs=8,
+    #                                                               class_weight='balanced',verbose=2),
 }
