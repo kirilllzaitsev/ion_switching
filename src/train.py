@@ -1,6 +1,7 @@
 from sklearn import metrics, preprocessing, ensemble
 from sklearn.model_selection import learning_curve, StratifiedKFold, ShuffleSplit
 from sklearn.metrics import f1_score, make_scorer
+from . import create_folds
 import pandas as pd
 import numpy as np
 import os
@@ -105,32 +106,39 @@ def plot_learning_curve(estimator, title, X, y, axes=None, ylim=None, cv=None,
 if __name__ == "__main__":
 
     threshold = 1
+    batch = 1_000_000
     df = pd.read_csv(TRAIN_DATA)
-    train_df = df[df.kfold.isin(FOLD_MAPPING.get(str(FOLD)))].iloc[:int(len(df)*threshold)]
-    val_df = df[df.kfold==FOLD].iloc[:int(len(df)*threshold)]
+
+
+    if FOLD == 0:
+        df = df[0:batch]
+    else:
+        df = df[batch+batch*(FOLD-1):batch+batch*(FOLD)]
+
+    train_df = df[:int(0.8*len(df))]
+    val_df = df[int(len(df)*0.8):]
 
     y_train = train_df.open_channels.values
     y_test = val_df.open_channels.values
 
-    train_df = train_df.drop(["open_channels","kfold","time"], axis=1)
-    val_df = val_df.drop(["open_channels", "kfold","time"], axis=1)
+    train_df = train_df.drop(["open_channels","time","signal"], axis=1)
+    val_df = val_df.drop(["open_channels","time","signal"], axis=1)
 
     print(train_df.columns)
     clf = dispatcher.MODELS.get(MODEL)
 
-    # plt.figure(figsize = (16,5))
-    # single_train_score_lc(clf, train_df, y_train, train_sizes=1, cv=2)
+    plt.figure(figsize = (16,5))
+    single_train_score_lc(clf, train_df, y_train, train_sizes=1, cv=2)
 
-    # fig, axes = plt.subplots(3, 1, figsize=(10, 15))
-    # title = "Learning Curves (RF)"
-    # # Cross validation with 100 iterations to get smoother mean test and train
-    # # score curves, each time with 20% data randomly selected as a validation set.
-    # cv = ShuffleSplit(n_splits=2, test_size=0.2, random_state=42)
-    #
-    # plot_learning_curve(clf, title, train_df, y_train, axes=axes,ylim=(0.7, 1.01),
-    #                     cv=cv, n_jobs=1)
-    #
-    # plt.show()
+    fig, axes = plt.subplots(3, 1, figsize=(10, 15))
+    title = "Learning Curves (RF)"
+
+    cv = ShuffleSplit(n_splits=2, test_size=0.2, random_state=42)
+
+    plot_learning_curve(clf, title, train_df, y_train, axes=axes,ylim=(0.5, 1.01),
+                        cv=cv, n_jobs=1)
+
+    plt.show()
 
     clf.fit(train_df, y_train)
 
