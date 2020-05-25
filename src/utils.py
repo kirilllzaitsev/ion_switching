@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pickle
 
-FEATURES = pd.read_csv('input/train_folds.csv').columns
+FEATURES = ['ndrift_signal','denoised_signal']
 
 def get_feature_importance(model):
     print("Features sorted by their score:")
@@ -10,7 +10,7 @@ def get_feature_importance(model):
              reverse=True))
 
 rf = None
-with open ('models/rF_0.pkl', 'rb') as f:
+with open ('models/rFOCslow_0.pkl', 'rb') as f:
     rF = pickle.load(f)
 
 print(FEATURES)

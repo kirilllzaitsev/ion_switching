@@ -8,6 +8,11 @@ df_test  = pd.read_csv("input/test.csv")
 
 def remove_drift():
 
+    """
+        Inspired by these kernels:
+        https://www.kaggle.com/tarunpaparaju/ion-switching-competition-signal-eda
+        https://www.kaggle.com/friedchips/clean-removal-of-data-drift
+    """
 
     hist_bins = np.linspace(-4,10,500)
     clean_hist = []
@@ -106,9 +111,6 @@ def remove_drift():
 
     df_train['ndrift_signal'] = list(itertools.chain(*train_signal_detrend))
     df_test['ndrift_signal'] = list(itertools.chain(*test_signal_detrend))
-
-    # df_train.groups = train_segm_signal_groups
-    # df_test.groups = test_segm_signal_groups
 
 
 
